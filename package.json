@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext .js"
+    "lint": "eslint src --ext .js",
+    "deploy": "vite build && gh-pages -d dist"
   },
   "keywords": [
     "dog",
@@ -22,6 +23,7 @@
   ],
   "license": "PROPRIETARY",
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "terser": "^5.44.1",
     "vite": "^5.0.11"
   },
