@@ -3,22 +3,36 @@
  * Copyright (c) 2024-2025 Giampietro Leonoro & Monica Amato. All Rights Reserved.
  */
 
+// Application Info
 export const COPYRIGHT = {
-  authors: ['Giampietro Leonoro', 'Monica Amato'],
   year: '2024-2025',
-  rights: 'All Rights Reserved',
-  protected: true,
+  authors: ['Giampietro Leonoro', 'Monica Amato'],
+  rights: 'All Rights Reserved - PROPRIETARY AND CONFIDENTIAL',
   version: '2.0.0'
 };
 
+// LocalStorage Keys
+export const STORAGE_KEYS = {
+  poops: 'poopTracker_poops',
+  dogProfile: 'poopTracker_dogProfile',
+  dogPhoto: 'poopTracker_dogPhoto',
+  savedNotes: 'poopTracker_savedNotes',
+  foodHistory: 'poopTracker_foodHistory',
+  gpsEnabled: 'poopTracker_gpsEnabled',
+  mapSettings: 'poopTracker_mapSettings',
+  firstTime: 'poopTracker_firstTime'
+};
+
+// Map Configuration
 export const MAP_CONFIG = {
-  defaultCenter: [45.4642, 9.1900],
-  defaultZoom: 13,
+  defaultCenter: [41.9028, 12.4964],
+  defaultZoom: 16,
   maxZoom: 19,
   tileLayerUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   clusterRadius: 80
 };
 
+// GPS Configuration
 export const GPS_CONFIG = {
   enableHighAccuracy: true,
   timeout: 10000,
@@ -26,55 +40,17 @@ export const GPS_CONFIG = {
   updateThrottle: 1000
 };
 
+// Poop Types
 export const POOP_TYPES = {
-  healthy: { label: '✅ Sana (Normale)', color: '#8B4513', icon: 'poop-happy' },
-  soft: { label: '⚠️ Morbida', color: '#D2B48C', icon: 'poop-sad' },
-  diarrhea: { label: '💧 Diarrea', color: '#D2B48C', icon: 'poop-sad' },
-  hard: { label: '🪨 Dura/Stitica', color: '#3D2817', icon: 'poop-hard' },
-  blood: { label: '🩸 Presenza di Sangue', color: '#FF4444', icon: 'poop-sick' },
-  mucus: { label: '🫧 Presenza di Muco', color: '#FF4444', icon: 'poop-sick' }
+  healthy: { label: '✅ Sana (Normale)', icon: 'poop-happy', color: '#8B4513' },
+  soft: { label: '⚠️ Morbida', icon: 'poop-sad', color: '#D2B48C' },
+  diarrhea: { label: '💧 Diarrea', icon: 'poop-sad', color: '#D2B48C' },
+  hard: { label: '🪨 Dura/Stitica', icon: 'poop-hard', color: '#3D2817' },
+  blood: { label: '🩸 Presenza di Sangue', icon: 'poop-sick', color: '#FF4444' },
+  mucus: { label: '🫧 Presenza di Muco', icon: 'poop-sick', color: '#FF4444' }
 };
 
-export const POOP_SIZES = {
-  small: 'Piccola',
-  medium: 'Media',
-  large: 'Grande'
-};
-
-export const POOP_COLORS = {
-  normal: 'Marrone Normale',
-  light: 'Chiaro',
-  dark: 'Scuro',
-  green: 'Verdastro',
-  yellow: 'Giallastro',
-  red: 'Rossastro'
-};
-
-export const POOP_SMELLS = {
-  normal: 'Normale',
-  strong: 'Molto Forte',
-  unusual: 'Insolito'
-};
-
-export const FILTER_PERIODS = {
-  all: 'Tutte',
-  today: 'Oggi',
-  yesterday: 'Ieri',
-  week: 'Ultima Settimana',
-  month: 'Ultimo Mese'
-};
-
-export const STORAGE_KEYS = {
-  poops: 'poop-tracker-poops',
-  dogPhoto: 'poop-tracker-dog-photo',
-  dogProfile: 'poop-tracker-dog-profile',
-  savedNotes: 'poop-tracker-saved-notes',
-  foodHistory: 'poop-tracker-food-history',
-  gpsEnabled: 'poop-tracker-gps-enabled',
-  mapSettings: 'poop-tracker-map-settings',
-  firstTime: 'poop-tracker-first-time'
-};
-
+// Chart Colors
 export const CHART_COLORS = {
   healthy: '#4CAF50',
   soft: '#FF9800',
@@ -84,6 +60,39 @@ export const CHART_COLORS = {
   mucus: '#9C27B0'
 };
 
-export const REMINDER_DAYS_BEFORE = 7; // Giorni prima della scadenza per mostrare promemoria
+// Poop Sizes
+export const POOP_SIZES = {
+  small: 'Piccola',
+  medium: 'Media',
+  large: 'Grande'
+};
 
-export const TOAST_DURATION = 3000; // Durata toast in ms
+// Poop Colors
+export const POOP_COLORS = {
+  normal: 'Marrone Normale',
+  light: 'Chiaro',
+  dark: 'Scuro',
+  green: 'Verdastro',
+  yellow: 'Giallastro',
+  red: 'Rossastro'
+};
+
+// Poop Smells
+export const POOP_SMELLS = {
+  normal: 'Normale',
+  strong: 'Molto Forte',
+  unusual: 'Insolito'
+};
+
+// Filter Periods
+export const FILTER_PERIODS = {
+  all: 'Tutte',
+  today: 'Oggi',
+  yesterday: 'Ieri',
+  week: 'Ultima Settimana',
+  month: 'Ultimo Mese'
+};
+
+// UI Constants
+export const TOAST_DURATION = 3000;
+export const REMINDER_DAYS_BEFORE = 7;
