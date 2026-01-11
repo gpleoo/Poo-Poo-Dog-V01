@@ -1,0 +1,684 @@
+<!--
+ * Poo-Poo Dog Tracker
+ * Copyright (c) 2024-2025 Giampietro Leonoro & Monica Amato. All Rights Reserved.
+ *
+ * PROPRIETARY AND CONFIDENTIAL
+ * Unauthorized copying, modification, distribution, or use of this software,
+ * via any medium, is strictly prohibited without explicit written permission.
+ *
+ * This software is protected by copyright law and international treaties.
+ * Unauthorized reproduction or distribution of this software, or any portion of it,
+ * may result in severe civil and criminal penalties, and will be prosecuted
+ * to the maximum extent possible under the law.
+ *
+ * For licensing information, contact: Giampietro Leonoro & Monica Amato
+ * DO NOT REMOVE THIS COPYRIGHT NOTICE
+-->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f093fb">
+    <meta name="copyright" content="Copyright (c) 2024-2025 Giampietro Leonoro & Monica Amato. All Rights Reserved.">
+    <meta name="author" content="Giampietro Leonoro, Monica Amato">
+    <meta name="rights" content="This is proprietary software. Unauthorized use is prohibited.">
+    <title>🐕 Poo-Poo Dog Tracker 💩</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Bubblegum+Sans&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <button id="dogProfileBtn" class="btn-dog-profile" title="Profilo Cane">
+                🐕
+            </button>
+            <div class="header-content">
+                <h1 class="app-title" id="appTitle">🐕 Poo-Poo Dog Tracker 💩</h1>
+                <div class="header-stats">
+                    <div class="poop-counter">
+                        Cacche trovate: <span id="poopCount">0</span> 💩
+                    </div>
+                    <button id="remindersBtn" class="btn-reminders" title="Promemoria Vaccinazioni">
+                        <span class="reminder-icon">💉</span>
+                        <span id="remindersBadge" class="reminders-badge" style="display: none;">0</span>
+                    </button>
+                    <button id="settingsBtn" class="btn-settings" title="Impostazioni Privacy">
+                        ⚙️
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Reminders Modal -->
+        <div id="remindersModal" class="modal">
+            <div class="modal-content modal-reminders">
+                <h2>💉 Promemoria Vaccinazioni e Antiparassitari</h2>
+
+                <div id="remindersList" class="reminders-list">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="form-buttons">
+                    <button id="openProfileFromReminders" class="btn-save">⚙️ Gestisci Date</button>
+                    <button id="closeReminders" class="btn-secondary">✖️ Chiudi</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings/Privacy Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content modal-settings">
+                <h2>⚙️ Impostazioni Privacy</h2>
+
+                <div class="settings-section">
+                    <h3>📍 Geolocalizzazione</h3>
+                    <p class="settings-description">
+                        L'app usa la tua posizione GPS per tracciare dove il tuo cane fa la cacca.
+                        I dati sono salvati solo sul tuo dispositivo, non vengono mai inviati a server esterni.
+                    </p>
+
+                    <div class="setting-item">
+                        <label class="toggle-label">
+                            <span>Attiva Geolocalizzazione</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="gpsToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="gpsStatusInfo" class="gps-status">
+                        <div id="gpsStatusIcon">📍</div>
+                        <div id="gpsStatusText">Stato GPS: Attivo</div>
+                    </div>
+
+                    <button id="requestGPSBtn" class="btn-request-gps" style="display: none;">
+                        📍 Richiedi Permessi GPS
+                    </button>
+
+                    <div id="gpsInstructions" class="gps-instructions" style="display: none;">
+                        <strong>⚠️ GPS Negato - Come Riattivarlo:</strong>
+                        <ol>
+                            <li><strong>Safari (iPhone):</strong> Impostazioni → Safari → Posizione → Consenti</li>
+                            <li><strong>Chrome (Android):</strong> Impostazioni → Siti → Autorizzazioni → Posizione</li>
+                            <li><strong>Chrome (iPhone):</strong> Impostazioni iOS → Chrome → Posizione → Consenti</li>
+                            <li>Ricarica la pagina dopo aver modificato i permessi</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🔒 Privacy Dati</h3>
+                    <p class="settings-description">
+                        Tutti i dati (cacche, foto, profilo cane) sono salvati <strong>esclusivamente sul tuo dispositivo</strong>
+                        tramite LocalStorage. Non vengono mai caricati su cloud o condivisi con terze parti.
+                    </p>
+
+                    <div class="privacy-info">
+                        <div class="privacy-item">✅ Nessun tracking</div>
+                        <div class="privacy-item">✅ Nessun cookie di terze parti</div>
+                        <div class="privacy-item">✅ Dati solo in locale</div>
+                        <div class="privacy-item">✅ Privacy totale</div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>💾 Backup e Ripristino</h3>
+                    <p class="settings-description">
+                        Esporta tutti i tuoi dati (cacche, profilo cane, note) in un file di backup.
+                        Potrai importarlo in futuro per ripristinare tutto.
+                    </p>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                        <button id="exportBackupBtn" class="btn-save">
+                            💾 Esporta Backup
+                        </button>
+                        <button id="importBackupBtn" class="btn-secondary">
+                            📂 Importa Backup
+                        </button>
+                    </div>
+                    <input type="file" id="importBackupInput" accept=".json" style="display: none;">
+
+                    <p class="settings-info" style="font-size: 0.9em; color: #666;">
+                        💡 Consiglio: Fai un backup regolarmente per non perdere i dati!
+                    </p>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🗑️ Gestione Dati</h3>
+                    <button id="clearAllDataBtn" class="btn-danger">
+                        🗑️ Cancella Tutti i Dati
+                    </button>
+                    <p class="settings-warning">
+                        ⚠️ Questa azione cancellerà permanentemente tutte le cacche, il profilo del cane e le impostazioni.
+                        Non è reversibile!
+                    </p>
+                </div>
+
+                <div class="form-buttons">
+                    <button id="closeSettings" class="btn-save">✅ Chiudi</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="addPoopBtn" class="btn-add-poop" title="Aggiungi cacca qui con GPS!">
+                <span class="btn-icon">💩</span>
+                <span class="btn-text">Cacca Qui!</span>
+            </button>
+
+            <button id="addManualPoopBtn" class="btn-manual-poop" title="Aggiungi cacca manuale (senza GPS)">
+                <span class="btn-icon">📝</span>
+                <span class="btn-text">Manuale</span>
+            </button>
+
+            <button id="centerMapBtn" class="btn-center" title="Centra sulla tua posizione">
+                <span class="btn-icon">📍</span>
+            </button>
+
+            <button id="filterBtn" class="btn-filter" title="Filtri e Statistiche">
+                <span class="btn-icon">📊</span>
+            </button>
+        </div>
+
+        <!-- Dog Photo Modal -->
+        <div id="dogPhotoModal" class="modal">
+            <div class="modal-content">
+                <h2>📸 Aggiungi la foto del tuo cane!</h2>
+                <div class="dog-photo-container">
+                    <div id="dogPhotoPreview" class="dog-photo-preview">
+                        <span class="placeholder-text">Clicca per aggiungere foto 🐕</span>
+                    </div>
+                    <input type="file" id="dogPhotoInput" accept="image/*" style="display: none;">
+                </div>
+                <button id="saveDogPhoto" class="btn-save">Salva Foto</button>
+                <button id="removeDogPhoto" class="btn-remove">Rimuovi Foto</button>
+            </div>
+        </div>
+
+        <!-- Poop Details Modal -->
+        <div id="poopDetailsModal" class="modal">
+            <div class="modal-content modal-details">
+                <h2>💩 Dettagli della Cacca</h2>
+                <form id="poopDetailsForm">
+                    <div class="form-group">
+                        <label>😊 Stato Generale</label>
+                        <select id="poopType" required>
+                            <option value="healthy">✅ Sana (Normale)</option>
+                            <option value="soft">⚠️ Morbida</option>
+                            <option value="diarrhea">💧 Diarrea</option>
+                            <option value="hard">🪨 Dura/Stitica</option>
+                            <option value="blood">🩸 Presenza di Sangue</option>
+                            <option value="mucus">🫧 Presenza di Muco</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>📏 Dimensione</label>
+                        <select id="poopSize">
+                            <option value="small">Piccola</option>
+                            <option value="medium" selected>Media</option>
+                            <option value="large">Grande</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🎨 Colore</label>
+                        <select id="poopColor">
+                            <option value="normal" selected>Marrone Normale</option>
+                            <option value="light">Chiaro</option>
+                            <option value="dark">Scuro</option>
+                            <option value="green">Verdastro</option>
+                            <option value="yellow">Giallastro</option>
+                            <option value="red">Rossastro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>👃 Odore</label>
+                        <select id="poopSmell">
+                            <option value="normal" selected>Normale</option>
+                            <option value="strong">Molto Forte</option>
+                            <option value="unusual">Insolito</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🍖 Ultimo Cibo Mangiato</label>
+                        <input type="text" id="poopFood" list="foodSuggestions" placeholder="Es: Crocchette al pollo, carne cruda...">
+                        <datalist id="foodSuggestions"></datalist>
+                    </div>
+
+                    <div class="form-group">
+                        <label>⏰ Ore dal Pasto</label>
+                        <input type="number" id="poopHoursSinceMeal" placeholder="Es: 3" min="0" step="0.5">
+                    </div>
+
+                    <!-- Campi data/ora per inserimento manuale -->
+                    <div id="manualDateTimeSection" class="form-group" style="display: none;">
+                        <div style="background: #f0f0f0; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                            <h4 style="margin-top: 0; color: #667eea;">📅 Quando è successo?</h4>
+
+                            <div class="form-group">
+                                <label>📅 Data</label>
+                                <input type="date" id="poopDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>🕐 Ora</label>
+                                <input type="time" id="poopTime" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>📝 Note (opzionale)</label>
+                        <select id="savedNotes" class="note-selector">
+                            <option value="">Seleziona nota salvata o scrivi nuova...</option>
+                        </select>
+                        <textarea id="poopNotes" placeholder="Es: Il cane sembrava a disagio, respirava affannosamente..."></textarea>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="saveNote">
+                            Salva questa nota per riutilizzarla in futuro
+                        </label>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-save">💾 Salva Cacca</button>
+                        <button type="button" id="cancelPoopDetails" class="btn-remove">✖️ Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filters & Stats Modal -->
+        <div id="filtersModal" class="modal">
+            <div class="modal-content modal-filters">
+                <h2>📊 Filtri e Statistiche</h2>
+
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalPoops">0</div>
+                        <div class="stat-label">Totale Cacche</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="healthyPoops">0</div>
+                        <div class="stat-label">Sane ✅</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="problemPoops">0</div>
+                        <div class="stat-label">Problemi ⚠️</div>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <h3>🔍 Filtra per:</h3>
+
+                    <div class="form-group">
+                        <label>📅 Periodo</label>
+                        <select id="filterPeriod">
+                            <option value="all">Tutte</option>
+                            <option value="today">Oggi</option>
+                            <option value="yesterday">Ieri</option>
+                            <option value="week">Ultima Settimana</option>
+                            <option value="month">Ultimo Mese</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🩺 Stato</label>
+                        <select id="filterType">
+                            <option value="all">Tutti</option>
+                            <option value="healthy">Solo Sane ✅</option>
+                            <option value="soft">Solo Morbide ⚠️</option>
+                            <option value="diarrhea">Solo Diarrea 💧</option>
+                            <option value="blood">Con Sangue 🩸</option>
+                            <option value="mucus">Con Muco 🫧</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🍖 Cibo Mangiato</label>
+                        <select id="filterFood">
+                            <option value="all">Tutti i Cibi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button id="applyFilters" class="btn-save">✔️ Applica Filtri</button>
+                        <button id="resetFilters" class="btn-remove">🔄 Reset</button>
+                        <button id="exportPdfBtn" class="btn-export">📄 Esporta PDF</button>
+                        <button id="closeFilters" class="btn-secondary">✖️ Chiudi</button>
+                    </div>
+                </div>
+
+                <div class="recent-poops">
+                    <h3>📋 Ultime Cacche</h3>
+                    <div id="recentPoopsList"></div>
+                </div>
+
+                <div class="health-charts">
+                    <h3>📈 Grafici Andamento Salute</h3>
+
+                    <div class="chart-container">
+                        <h4>Distribuzione Tipo Cacche</h4>
+                        <canvas id="typeChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h4>Andamento Temporale (Ultimi 30 Giorni)</h4>
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h4>Correlazione Cibo - Problemi</h4>
+                        <canvas id="foodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dog Profile Modal -->
+        <div id="dogProfileModal" class="modal">
+            <div class="modal-content modal-profile">
+                <h2>🐕 Profilo del Cane</h2>
+                <form id="dogProfileForm">
+                    <div class="profile-section">
+                        <h3>📋 Informazioni Generali</h3>
+
+                        <div class="form-group">
+                            <label>🏷️ Nome del Cane</label>
+                            <input type="text" id="dogName" placeholder="Es: Bobby" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>🎂 Data di Nascita</label>
+                                <input type="date" id="dogBirthdate">
+                            </div>
+                            <div class="form-group">
+                                <label>⚖️ Peso (kg)</label>
+                                <input type="number" id="dogWeight" placeholder="Es: 15" step="0.1" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>🐾 Razza</label>
+                                <input type="text" id="dogBreed" placeholder="Es: Labrador, Meticcio...">
+                            </div>
+                            <div class="form-group">
+                                <label>⚧️ Sesso</label>
+                                <select id="dogGender">
+                                    <option value="">Non specificato</option>
+                                    <option value="male">Maschio</option>
+                                    <option value="female">Femmina</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>🎨 Colore Mantello</label>
+                                <input type="text" id="dogColor" placeholder="Es: Marrone, Bianco e nero...">
+                            </div>
+                            <div class="form-group">
+                                <label>💳 Microchip</label>
+                                <input type="text" id="dogMicrochip" placeholder="Es: 380260000000000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>🏥 Salute</h3>
+
+                        <div class="form-group">
+                            <label>🩺 Malattie Croniche</label>
+                            <textarea id="dogChronicDiseases" placeholder="Es: Displasia dell'anca, artrite..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>🍎 Allergie Alimentari</label>
+                            <textarea id="dogFoodAllergies" placeholder="Es: Pollo, glutine, latticini..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>💊 Allergie Farmaci</label>
+                            <textarea id="dogMedicineAllergies" placeholder="Es: Penicillina, cortisone..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>💊 Farmaci in Corso</label>
+                            <textarea id="dogCurrentMedicine" placeholder="Es: Antidolorifico 1 volta/giorno..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>🩹 Interventi Chirurgici Passati</label>
+                            <textarea id="dogSurgeries" placeholder="Es: Sterilizzazione (2020), rimozione tumore (2022)..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>👨‍⚕️ Veterinario</h3>
+
+                        <div class="form-group">
+                            <label>🏥 Nome Clinica/Veterinario</label>
+                            <input type="text" id="vetName" placeholder="Es: Clinica Veterinaria San Marco">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>📞 Telefono</label>
+                                <input type="tel" id="vetPhone" placeholder="Es: +39 02 1234567">
+                            </div>
+                            <div class="form-group">
+                                <label>📧 Email</label>
+                                <input type="email" id="vetEmail" placeholder="Es: info@clinicavet.it">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>📍 Indirizzo</label>
+                            <input type="text" id="vetAddress" placeholder="Es: Via Roma 123, Milano">
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>💉 Vaccinazioni e Antiparassitari</h3>
+
+                        <div class="form-group">
+                            <label>💉 Ultima Vaccinazione</label>
+                            <input type="date" id="lastVaccination">
+                        </div>
+
+                        <div class="form-group">
+                            <label>📅 Prossima Vaccinazione Prevista</label>
+                            <input type="date" id="nextVaccination">
+                        </div>
+
+                        <div class="form-group">
+                            <label>🐛 Ultimo Antiparassitario</label>
+                            <input type="date" id="lastAntiparasitic">
+                        </div>
+
+                        <div class="form-group">
+                            <label>📅 Prossimo Antiparassitario Previsto</label>
+                            <input type="date" id="nextAntiparasitic">
+                        </div>
+
+                        <div class="form-group">
+                            <label>🦟 Ultimo Antipulci/Zecche</label>
+                            <input type="date" id="lastFleaTick">
+                        </div>
+
+                        <div class="form-group">
+                            <label>📅 Prossimo Antipulci/Zecche Previsto</label>
+                            <input type="date" id="nextFleaTick">
+                        </div>
+
+                        <div class="form-group">
+                            <label>📝 Note su Vaccini e Antiparassitari</label>
+                            <textarea id="vaccinationNotes" placeholder="Es: Vaccino pentavalente, Antiparassitario mensile..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>📝 Note Generali</h3>
+                        <div class="form-group">
+                            <textarea id="dogGeneralNotes" placeholder="Es: Ha paura dei fuochi d'artificio, adora giocare con la palla..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-save">💾 Salva Profilo</button>
+                        <button type="button" id="cancelDogProfile" class="btn-secondary">✖️ Chiudi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Toast -->
+        <div id="infoToast" class="info-toast">
+            <span id="toastMessage"></span>
+        </div>
+
+        <!-- Copyright Footer -->
+        <footer class="app-footer">
+            <div class="copyright-notice">
+                © 2024-2025 <strong>Giampietro Leonoro & Monica Amato</strong> - Tutti i Diritti Riservati
+            </div>
+        </footer>
+    </div>
+
+    <!-- Copyright Protection - DO NOT REMOVE -->
+    <div style="display:none;" id="copyright-marker" data-authors="Giampietro_Leonoro_Monica_Amato" data-year="2024" data-protected="true"></div>
+
+    <!-- SVG Icons (hidden) -->
+    <svg style="display: none;">
+        <defs>
+            <!-- Happy Poop (Sana - Marrone) -->
+            <symbol id="poop-happy" viewBox="0 0 100 100">
+                <!-- Corpo marrone -->
+                <ellipse cx="50" cy="70" rx="35" ry="30" fill="#8B4513"/>
+                <ellipse cx="50" cy="50" rx="30" ry="25" fill="#8B4513"/>
+                <ellipse cx="50" cy="30" rx="20" ry="18" fill="#8B4513"/>
+                <!-- Ombre per profondità -->
+                <ellipse cx="50" cy="72" rx="30" ry="25" fill="#6B3410" opacity="0.3"/>
+                <!-- Occhi grandi bianchi -->
+                <circle cx="40" cy="45" r="7" fill="white"/>
+                <circle cx="60" cy="45" r="7" fill="white"/>
+                <!-- Pupille grandi -->
+                <circle cx="41" cy="45" r="3.5" fill="black"/>
+                <circle cx="61" cy="45" r="3.5" fill="black"/>
+                <!-- Riflessi negli occhi -->
+                <circle cx="39" cy="43" r="1.5" fill="white" opacity="0.8"/>
+                <circle cx="59" cy="43" r="1.5" fill="white" opacity="0.8"/>
+                <!-- Sorriso grande -->
+                <path d="M 35 56 Q 50 65 65 56" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Sad Poop (Morbida/Diarrea - Marrone Chiarissimo) -->
+            <symbol id="poop-sad" viewBox="0 0 100 100">
+                <!-- Corpo marrone molto chiaro -->
+                <ellipse cx="50" cy="70" rx="35" ry="30" fill="#D2B48C"/>
+                <ellipse cx="50" cy="50" rx="30" ry="25" fill="#D2B48C"/>
+                <ellipse cx="50" cy="30" rx="20" ry="18" fill="#D2B48C"/>
+                <!-- Ombre per profondità -->
+                <ellipse cx="50" cy="72" rx="30" ry="25" fill="#C19A6B" opacity="0.3"/>
+                <!-- Occhi grandi bianchi -->
+                <circle cx="40" cy="45" r="7" fill="white"/>
+                <circle cx="60" cy="45" r="7" fill="white"/>
+                <!-- Pupille grandi -->
+                <circle cx="41" cy="46" r="3.5" fill="black"/>
+                <circle cx="61" cy="46" r="3.5" fill="black"/>
+                <!-- Riflessi negli occhi -->
+                <circle cx="39" cy="44" r="1.5" fill="white" opacity="0.8"/>
+                <circle cx="59" cy="44" r="1.5" fill="white" opacity="0.8"/>
+                <!-- Bocca triste -->
+                <path d="M 35 62 Q 50 56 65 62" stroke="black" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Hard Poop (Dura - Marrone Scurissimo) -->
+            <symbol id="poop-hard" viewBox="0 0 100 100">
+                <!-- Corpo marrone scurissimo -->
+                <ellipse cx="50" cy="70" rx="35" ry="30" fill="#3D2817"/>
+                <ellipse cx="50" cy="50" rx="30" ry="25" fill="#3D2817"/>
+                <ellipse cx="50" cy="30" rx="20" ry="18" fill="#3D2817"/>
+                <!-- Ombre per profondità -->
+                <ellipse cx="50" cy="72" rx="30" ry="25" fill="#1A0F08" opacity="0.4"/>
+                <!-- Occhi grandi bianchi -->
+                <circle cx="40" cy="45" r="7" fill="white"/>
+                <circle cx="60" cy="45" r="7" fill="white"/>
+                <!-- Pupille grandi verso il basso (sforzo) -->
+                <circle cx="41" cy="47" r="3.5" fill="black"/>
+                <circle cx="61" cy="47" r="3.5" fill="black"/>
+                <!-- Riflessi negli occhi -->
+                <circle cx="39" cy="45" r="1.5" fill="white" opacity="0.8"/>
+                <circle cx="59" cy="45" r="1.5" fill="white" opacity="0.8"/>
+                <!-- Bocca tesa (sforzo) -->
+                <line x1="38" y1="59" x2="62" y2="59" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                <!-- Sopracciglia aggrottate (sforzo) -->
+                <path d="M 33 38 L 40 40" stroke="black" stroke-width="2" stroke-linecap="round"/>
+                <path d="M 67 38 L 60 40" stroke="black" stroke-width="2" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Sick Poop (Sangue/Muco - Rosso Acceso) -->
+            <symbol id="poop-sick" viewBox="0 0 100 100">
+                <!-- Corpo rosso acceso -->
+                <ellipse cx="50" cy="70" rx="35" ry="30" fill="#FF4444"/>
+                <ellipse cx="50" cy="50" rx="30" ry="25" fill="#FF4444"/>
+                <ellipse cx="50" cy="30" rx="20" ry="18" fill="#FF4444"/>
+                <!-- Ombre per profondità -->
+                <ellipse cx="50" cy="72" rx="30" ry="25" fill="#CC0000" opacity="0.3"/>
+                <!-- Occhi grandi bianchi -->
+                <circle cx="40" cy="45" r="7" fill="white"/>
+                <circle cx="60" cy="45" r="7" fill="white"/>
+                <!-- Occhi a spirale (malessere) -->
+                <path d="M 37 45 Q 37 42 40 42 Q 43 42 43 45 Q 43 47 41 47"
+                      stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M 57 45 Q 57 42 60 42 Q 63 42 63 45 Q 63 47 61 47"
+                      stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <!-- Bocca ondulata (malessere) -->
+                <path d="M 35 58 Q 42 56 50 58 Q 58 60 65 58" stroke="black" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <!-- Gocce di sudore -->
+                <ellipse cx="30" cy="35" rx="3" ry="4" fill="#88CCFF" opacity="0.7"/>
+                <ellipse cx="70" cy="35" rx="3" ry="4" fill="#88CCFF" opacity="0.7"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Leaflet MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Chart.js for Health Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- App JS -->
+    <script src="app.js"></script>
+</body>
+</html>
