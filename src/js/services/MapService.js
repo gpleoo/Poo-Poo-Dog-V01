@@ -302,6 +302,32 @@ export class MapService {
     this.userMarker.bindPopup(popupText);
   }
 
+  /**
+   * Toggle dog marker visibility
+   */
+  toggleDogMarkerVisibility(show) {
+    if (!this.userMarker) return false;
+
+    if (show) {
+      if (!this.map.hasLayer(this.userMarker)) {
+        this.map.addLayer(this.userMarker);
+      }
+    } else {
+      if (this.map.hasLayer(this.userMarker)) {
+        this.map.removeLayer(this.userMarker);
+      }
+    }
+    return show;
+  }
+
+  /**
+   * Check if dog marker is visible
+   */
+  isDogMarkerVisible() {
+    if (!this.userMarker) return false;
+    return this.map.hasLayer(this.userMarker);
+  }
+
   // ========== POOP MARKERS ==========
 
   /**

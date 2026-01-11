@@ -252,7 +252,7 @@ button:active {
     50% { transform: translateY(-5px); }
 }
 
-.btn-center, .btn-clear, .btn-filter {
+.btn-center, .btn-clear, .btn-filter, .btn-toggle-dog {
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -276,6 +276,26 @@ button:active {
 }
 
 .btn-filter:hover {
+    transform: scale(1.1);
+}
+
+/* Toggle Dog Marker Button */
+.btn-toggle-dog {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    transition: all 0.3s ease;
+}
+
+.btn-toggle-dog.active {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    box-shadow: 0 4px 20px rgba(250, 112, 154, 0.5);
+}
+
+.btn-toggle-dog:not(.active) {
+    background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
+    opacity: 0.6;
+}
+
+.btn-toggle-dog:hover {
     transform: scale(1.1);
 }
 
@@ -513,7 +533,7 @@ button:active {
         font-size: 0.95em;
     }
 
-    .btn-center, .btn-clear {
+    .btn-center, .btn-clear, .btn-toggle-dog {
         width: 50px;
         height: 50px;
         font-size: 1.2em;
@@ -538,7 +558,7 @@ button:active {
         padding: 10px 15px;
     }
 
-    .btn-center, .btn-clear, .btn-filter {
+    .btn-center, .btn-clear, .btn-filter, .btn-toggle-dog {
         width: 50px;
         height: 50px;
         font-size: 1.2em;

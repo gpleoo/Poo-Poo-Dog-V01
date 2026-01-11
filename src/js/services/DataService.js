@@ -33,7 +33,7 @@ export class DataService {
       this.savedNotes = this._loadFromStorage(STORAGE_KEYS.savedNotes, []);
       this.foodHistory = this._loadFromStorage(STORAGE_KEYS.foodHistory, []);
       this.gpsEnabled = this._loadFromStorage(STORAGE_KEYS.gpsEnabled, true);
-      this.mapSettings = this._loadFromStorage(STORAGE_KEYS.mapSettings, { zoom: 16, autoCenter: true });
+      this.mapSettings = this._loadFromStorage(STORAGE_KEYS.mapSettings, { zoom: 16, autoCenter: true, dogMarkerVisible: true });
       this.isFirstTime = this._loadFromStorage(STORAGE_KEYS.firstTime, true);
 
       console.log('✅ Data loaded successfully');
@@ -366,7 +366,7 @@ export class DataService {
     this.dogPhoto = data.dogPhoto || null;
     this.savedNotes = data.savedNotes || [];
     this.foodHistory = data.foodHistory || [];
-    this.mapSettings = data.mapSettings || { zoom: 16, autoCenter: true };
+    this.mapSettings = data.mapSettings || { zoom: 16, autoCenter: true, dogMarkerVisible: true };
 
     // Save to localStorage
     this._saveToStorage(STORAGE_KEYS.poops, this.poops);
@@ -389,7 +389,7 @@ export class DataService {
     this.savedNotes = [];
     this.foodHistory = [];
     this.gpsEnabled = true;
-    this.mapSettings = { zoom: 16, autoCenter: true };
+    this.mapSettings = { zoom: 16, autoCenter: true, dogMarkerVisible: true };
     this.isFirstTime = true;
 
     // Clear localStorage

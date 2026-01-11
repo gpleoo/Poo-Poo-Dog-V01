@@ -93,6 +93,11 @@ class PoopTracker {
       // Update dog marker
       this.updateDogMarker();
 
+      // Apply dog marker visibility from settings
+      const dogMarkerVisible = mapSettings.dogMarkerVisible !== false;
+      this.mapService.toggleDogMarkerVisibility(dogMarkerVisible);
+      this.updateDogMarkerButton(dogMarkerVisible);
+
       console.log('✅ Application initialized successfully!');
     } catch (error) {
       console.error('❌ Error initializing application:', error);
@@ -177,6 +182,12 @@ class PoopTracker {
     const centerMapBtn = document.getElementById('centerMapBtn');
     if (centerMapBtn) {
       centerMapBtn.addEventListener('click', () => this.mapService.centerOnUser());
+    }
+
+    // Toggle dog marker button
+    const toggleDogMarkerBtn = document.getElementById('toggleDogMarkerBtn');
+    if (toggleDogMarkerBtn) {
+      toggleDogMarkerBtn.addEventListener('click', () => this.toggleDogMarker());
     }
   }
 
@@ -514,6 +525,44 @@ class PoopTracker {
     } catch (error) {
       console.error('Error clearing data:', error);
       this.notificationService.showError('Errore durante la cancellazione dei dati');
+    }
+  }
+
+  toggleDogMarker() {
+    try {
+      const currentVisibility = this.mapService.isDogMarkerVisible();
+      const newVisibility = !currentVisibility;
+
+      this.mapService.toggleDogMarkerVisibility(newVisibility);
+      this.updateDogMarkerButton(newVisibility);
+
+      // Save preference
+      const mapSettings = this.mapService.getMapSettings();
+      mapSettings.dogMarkerVisible = newVisibility;
+      this.dataService.saveMapSettings(mapSettings);
+
+      // Show feedback
+      if (newVisibility) {
+        this.notificationService.showInfo('🐕 Marker del cane visibile');
+      } else {
+        this.notificationService.showInfo('🐕 Marker del cane nascosto');
+      }
+    } catch (error) {
+      console.error('Error toggling dog marker:', error);
+      this.notificationService.showError('Errore durante il toggle del marker');
+    }
+  }
+
+  updateDogMarkerButton(isVisible) {
+    const btn = document.getElementById('toggleDogMarkerBtn');
+    if (btn) {
+      if (isVisible) {
+        btn.classList.add('active');
+        btn.title = 'Nascondi marker del cane';
+      } else {
+        btn.classList.remove('active');
+        btn.title = 'Mostra marker del cane';
+      }
     }
   }
 
