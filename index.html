@@ -28,6 +28,10 @@
                     <div class="poop-counter">
                         Cacche trovate: <span id="poopCount">0</span> 💩
                     </div>
+                    <button id="achievementsBtn" class="btn-achievements" title="Traguardi e Punteggi" aria-label="Apri traguardi">
+                        <span class="achievement-icon">🏆</span>
+                        <span id="achievementsBadge" class="achievements-badge" style="display: none;">0</span>
+                    </button>
                     <button id="remindersBtn" class="btn-reminders" title="Promemoria Vaccinazioni" aria-label="Apri promemoria">
                         <span class="reminder-icon">💉</span>
                         <span id="remindersBadge" class="reminders-badge" style="display: none;">0</span>
@@ -67,6 +71,53 @@
                 <div class="form-buttons">
                     <button id="goToProfileFromUrgent" class="btn-save">⚙️ Vai al Profilo</button>
                     <button id="closeUrgentReminders" class="btn-secondary">✖️ Ho Capito</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Modal -->
+        <div id="achievementsModal" class="modal" role="dialog" aria-labelledby="achievementsTitle" aria-hidden="true">
+            <div class="modal-content modal-achievements">
+                <h2 id="achievementsTitle">🏆 Traguardi e Punteggi</h2>
+
+                <div class="achievements-summary">
+                    <div class="achievement-stat">
+                        <div class="stat-value" id="totalPoints">0</div>
+                        <div class="stat-label">Punti Totali</div>
+                    </div>
+                    <div class="achievement-stat">
+                        <div class="stat-value" id="completedZones">0</div>
+                        <div class="stat-label">Zone Completate</div>
+                    </div>
+                    <div class="achievement-stat">
+                        <div class="stat-value" id="totalZones">0</div>
+                        <div class="stat-label">Zone Esplorate</div>
+                    </div>
+                </div>
+
+                <div class="achievements-section">
+                    <h3>🎖️ Badge Sbloccati</h3>
+                    <div id="badgesList" class="badges-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="achievements-section">
+                    <h3>🎯 Prossimo Traguardo</h3>
+                    <div id="nextBadge" class="next-badge">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="achievements-section">
+                    <h3>📊 Top Zone</h3>
+                    <div id="topZones" class="top-zones-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button id="closeAchievements" class="btn-secondary">✖️ Chiudi</button>
                 </div>
             </div>
         </div>
@@ -188,6 +239,10 @@
 
             <button id="toggleDogMarkerBtn" class="btn-toggle-dog active" title="Nascondi/Mostra marker del cane" aria-label="Toggle marker cane">
                 <span class="btn-icon" aria-hidden="true">🐕</span>
+            </button>
+
+            <button id="toggleQuadrantsBtn" class="btn-toggle-quadrants" title="Nascondi/Mostra quadranti" aria-label="Toggle quadranti">
+                <span class="btn-icon" aria-hidden="true">🗺️</span>
             </button>
 
             <button id="filterBtn" class="btn-filter" title="Filtri e Statistiche" aria-label="Apri filtri e statistiche">

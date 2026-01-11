@@ -20,6 +20,10 @@ export class DataService {
       autoCenter: true
     };
     this.isFirstTime = true;
+    this.achievements = {
+      completedQuadrants: 0,
+      quadrantsGridVisible: false
+    };
   }
 
   /**
@@ -35,6 +39,7 @@ export class DataService {
       this.gpsEnabled = this._loadFromStorage(STORAGE_KEYS.gpsEnabled, true);
       this.mapSettings = this._loadFromStorage(STORAGE_KEYS.mapSettings, { zoom: 16, autoCenter: true, dogMarkerVisible: true });
       this.isFirstTime = this._loadFromStorage(STORAGE_KEYS.firstTime, true);
+      this.achievements = this._loadFromStorage(STORAGE_KEYS.achievements, { completedQuadrants: 0, quadrantsGridVisible: false });
 
       console.log('✅ Data loaded successfully');
       return true;
@@ -324,6 +329,56 @@ export class DataService {
     return deepClone(this.mapSettings);
   }
 
+  // ========== ACHIEVEMENTS ==========
+
+  /**
+   * Save achievements data
+   */
+  saveAchievements(achievementsData) {
+    this.achievements = { ...this.achievements, ...achievementsData };
+    this._saveToStorage(STORAGE_KEYS.achievements, this.achievements);
+    return true;
+  }
+
+  /**
+   * Get achievements data
+   */
+  getAchievements() {
+    return deepClone(this.achievements);
+  }
+
+  /**
+   * Update completed quadrants count
+   */
+  updateCompletedQuadrants(count) {
+    this.achievements.completedQuadrants = count;
+    this._saveToStorage(STORAGE_KEYS.achievements, this.achievements);
+    return true;
+  }
+
+  /**
+   * Get completed quadrants count
+   */
+  getCompletedQuadrantsCount() {
+    return this.achievements.completedQuadrants || 0;
+  }
+
+  /**
+   * Save quadrants grid visibility
+   */
+  setQuadrantsGridVisible(visible) {
+    this.achievements.quadrantsGridVisible = visible;
+    this._saveToStorage(STORAGE_KEYS.achievements, this.achievements);
+    return true;
+  }
+
+  /**
+   * Get quadrants grid visibility
+   */
+  isQuadrantsGridVisible() {
+    return this.achievements.quadrantsGridVisible || false;
+  }
+
   // ========== BACKUP & RESTORE ==========
 
   /**
@@ -338,7 +393,8 @@ export class DataService {
       dogPhoto: this.dogPhoto,
       savedNotes: this.savedNotes,
       foodHistory: this.foodHistory,
-      mapSettings: this.mapSettings
+      mapSettings: this.mapSettings,
+      achievements: this.achievements
     };
 
     return JSON.stringify(backup, null, 2);
@@ -367,6 +423,7 @@ export class DataService {
     this.savedNotes = data.savedNotes || [];
     this.foodHistory = data.foodHistory || [];
     this.mapSettings = data.mapSettings || { zoom: 16, autoCenter: true, dogMarkerVisible: true };
+    this.achievements = data.achievements || { completedQuadrants: 0, quadrantsGridVisible: false };
 
     // Save to localStorage
     this._saveToStorage(STORAGE_KEYS.poops, this.poops);
@@ -375,6 +432,7 @@ export class DataService {
     this._saveToStorage(STORAGE_KEYS.savedNotes, this.savedNotes);
     this._saveToStorage(STORAGE_KEYS.foodHistory, this.foodHistory);
     this._saveToStorage(STORAGE_KEYS.mapSettings, this.mapSettings);
+    this._saveToStorage(STORAGE_KEYS.achievements, this.achievements);
 
     return true;
   }
@@ -391,6 +449,7 @@ export class DataService {
     this.gpsEnabled = true;
     this.mapSettings = { zoom: 16, autoCenter: true, dogMarkerVisible: true };
     this.isFirstTime = true;
+    this.achievements = { completedQuadrants: 0, quadrantsGridVisible: false };
 
     // Clear localStorage
     Object.values(STORAGE_KEYS).forEach(key => {

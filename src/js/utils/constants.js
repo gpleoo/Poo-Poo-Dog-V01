@@ -20,7 +20,8 @@ export const STORAGE_KEYS = {
   foodHistory: 'poopTracker_foodHistory',
   gpsEnabled: 'poopTracker_gpsEnabled',
   mapSettings: 'poopTracker_mapSettings',
-  firstTime: 'poopTracker_firstTime'
+  firstTime: 'poopTracker_firstTime',
+  achievements: 'poopTracker_achievements'
 };
 
 // Map Configuration

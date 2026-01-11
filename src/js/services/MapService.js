@@ -31,6 +31,10 @@ export class MapService {
     this.isUpdatingPosition = false;
     this.lastPositionUpdate = 0;
 
+    // Quadrants overlay
+    this.quadrantsLayer = null;
+    this.quadrantsVisible = false;
+
     // Callbacks
     this.onMarkerClick = null;
     this.onUserMarkerClick = null;
@@ -605,12 +609,119 @@ export class MapService {
     this.map.closePopup();
   }
 
+  // ========== QUADRANTS OVERLAY ==========
+
+  /**
+   * Update quadrants overlay on map
+   * @param {Object} quadrantsData - Quadrants data from AchievementsService
+   * @param {Function} getColorFn - Function to get color for quadrant
+   */
+  updateQuadrantsOverlay(quadrantsData, getColorFn) {
+    // Remove existing layer
+    if (this.quadrantsLayer) {
+      this.map.removeLayer(this.quadrantsLayer);
+      this.quadrantsLayer = null;
+    }
+
+    // Create new layer group
+    this.quadrantsLayer = L.layerGroup();
+
+    // Add rectangles for each quadrant
+    Object.values(quadrantsData).forEach(quadrant => {
+      const bounds = this.getQuadrantBounds(quadrant.cellId);
+      const color = getColorFn(quadrant.count);
+
+      const rectangle = L.rectangle(
+        [[bounds.south, bounds.west], [bounds.north, bounds.east]],
+        {
+          color: quadrant.completed ? '#4CAF50' : '#FFC107',
+          weight: 1,
+          fillColor: color,
+          fillOpacity: 0.4
+        }
+      );
+
+      // Add popup with info
+      const popupContent = `
+        <div style="text-align: center;">
+          <strong>${quadrant.completed ? '✅' : '🎯'} Zona ${quadrant.cellId}</strong><br>
+          <span style="font-size: 1.2em;">${quadrant.count} / 20 cacche</span><br>
+          ${quadrant.completed
+            ? '<span style="color: #4CAF50; font-weight: bold;">🏆 COMPLETATA!</span>'
+            : `<span style="color: #FFC107;">Ancora ${20 - quadrant.count} cacche per completare</span>`
+          }
+        </div>
+      `;
+
+      rectangle.bindPopup(popupContent);
+      this.quadrantsLayer.addLayer(rectangle);
+    });
+
+    // Add to map if visible
+    if (this.quadrantsVisible) {
+      this.map.addLayer(this.quadrantsLayer);
+    }
+  }
+
+  /**
+   * Get quadrant bounds from cell ID
+   * @param {string} cellId - Cell ID (e.g., "41_12")
+   * @returns {Object} Bounds {north, south, east, west}
+   */
+  getQuadrantBounds(cellId) {
+    const [cellLat, cellLng] = cellId.split('_').map(Number);
+    const gridSizeDegrees = 1000 / 111320; // 1000m to degrees
+
+    return {
+      south: cellLat * gridSizeDegrees,
+      north: (cellLat + 1) * gridSizeDegrees,
+      west: cellLng * gridSizeDegrees,
+      east: (cellLng + 1) * gridSizeDegrees
+    };
+  }
+
+  /**
+   * Toggle quadrants overlay visibility
+   * @param {boolean} visible - Show or hide
+   * @returns {boolean} New visibility state
+   */
+  toggleQuadrantsOverlay(visible) {
+    this.quadrantsVisible = visible;
+
+    if (!this.quadrantsLayer) return this.quadrantsVisible;
+
+    if (visible) {
+      if (!this.map.hasLayer(this.quadrantsLayer)) {
+        this.map.addLayer(this.quadrantsLayer);
+      }
+    } else {
+      if (this.map.hasLayer(this.quadrantsLayer)) {
+        this.map.removeLayer(this.quadrantsLayer);
+      }
+    }
+
+    return this.quadrantsVisible;
+  }
+
+  /**
+   * Check if quadrants overlay is visible
+   * @returns {boolean} Visibility state
+   */
+  areQuadrantsVisible() {
+    return this.quadrantsVisible;
+  }
+
   /**
    * Destroy map and cleanup
    */
   destroy() {
     this.stopWatchingPosition();
     this.clearAllPoopMarkers();
+
+    if (this.quadrantsLayer) {
+      this.map.removeLayer(this.quadrantsLayer);
+      this.quadrantsLayer = null;
+    }
 
     if (this.map) {
       this.map.remove();
