@@ -46,7 +46,8 @@ export class UIManager {
       'filtersModal',
       'settingsModal',
       'remindersModal',
-      'urgentRemindersModal'
+      'urgentRemindersModal',
+      'achievementsModal'
     ];
 
     modalIds.forEach(id => {
@@ -85,6 +86,9 @@ export class UIManager {
 
     // Reminders
     this.setupRemindersListeners();
+
+    // Achievements
+    this.setupAchievementsListeners();
   }
 
   // ========== MODAL MANAGEMENT ==========
@@ -824,6 +828,161 @@ export class UIManager {
         btn.classList.remove('urgent');
       }
     }
+  }
+
+  // ========== ACHIEVEMENTS ==========
+
+  setupAchievementsListeners() {
+    const openBtn = document.getElementById('achievementsBtn');
+    const closeBtn = document.getElementById('closeAchievements');
+
+    if (openBtn) {
+      openBtn.addEventListener('click', () => this.openModal('achievementsModal'));
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.closeModal('achievementsModal'));
+    }
+  }
+
+  /**
+   * Update achievements display
+   */
+  updateAchievements(achievementsData) {
+    if (!achievementsData) return;
+
+    // Update summary stats
+    document.getElementById('totalPoints').textContent = achievementsData.totalPoints || 0;
+    document.getElementById('completedZones').textContent = achievementsData.completedQuadrants || 0;
+    document.getElementById('totalZones').textContent = achievementsData.totalQuadrants || 0;
+
+    // Update badge counter
+    const badge = document.getElementById('achievementsBadge');
+    if (badge) {
+      if (achievementsData.completedQuadrants > 0) {
+        badge.textContent = achievementsData.completedQuadrants;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Update badges list
+    this.updateBadgesList(achievementsData.unlockedBadges || []);
+
+    // Update next badge
+    this.updateNextBadge(achievementsData.nextBadge);
+
+    // Update top zones
+    this.updateTopZones(achievementsData.topQuadrants || []);
+  }
+
+  /**
+   * Update badges list
+   */
+  updateBadgesList(badges) {
+    const list = document.getElementById('badgesList');
+    if (!list) return;
+
+    if (badges.length === 0) {
+      list.innerHTML = '<div class="badges-list empty">Nessun badge sbloccato ancora. Continua ad esplorare!</div>';
+      return;
+    }
+
+    list.innerHTML = badges.map(badge => `
+      <div class="badge-item">
+        <div class="badge-icon">${badge.icon}</div>
+        <div class="badge-name">${badge.name}</div>
+        <div class="badge-points">+${badge.points} punti</div>
+      </div>
+    `).join('');
+  }
+
+  /**
+   * Update next badge
+   */
+  updateNextBadge(nextBadge) {
+    const container = document.getElementById('nextBadge');
+    if (!container) return;
+
+    if (!nextBadge) {
+      container.innerHTML = '<div style="text-align: center; padding: 20px; color: white;">🎉 Hai sbloccato tutti i badge! Sei un campione!</div>';
+      return;
+    }
+
+    const progressPercent = Math.round((nextBadge.progress / nextBadge.threshold) * 100);
+
+    container.innerHTML = `
+      <div class="next-badge-name">${nextBadge.icon} ${nextBadge.name}</div>
+      <div class="next-badge-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${progressPercent}%">
+            ${progressPercent}%
+          </div>
+        </div>
+        <div class="progress-text">
+          ${nextBadge.progress}/${nextBadge.threshold} zone completate
+          (ancora ${nextBadge.remaining} per sbloccare)
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Update top zones
+   */
+  updateTopZones(topZones) {
+    const list = document.getElementById('topZones');
+    if (!list) return;
+
+    if (topZones.length === 0) {
+      list.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Nessuna zona esplorata ancora</div>';
+      return;
+    }
+
+    list.innerHTML = topZones.map(zone => `
+      <div class="zone-item ${zone.completed ? 'completed' : ''}">
+        <div class="zone-info">
+          <div class="zone-name">Zona ${zone.cellId}</div>
+          <div class="zone-progress-bar">
+            <div class="zone-progress-fill" style="width: ${zone.progress}%"></div>
+          </div>
+        </div>
+        <div class="zone-count">${zone.count}/20</div>
+      </div>
+    `).join('');
+  }
+
+  /**
+   * Show achievement unlocked notification
+   */
+  showAchievementUnlocked(achievement) {
+    if (!achievement) return;
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'achievement-unlocked';
+    notification.innerHTML = `
+      <div class="achievement-unlocked-content">
+        <div class="achievement-unlocked-icon">${achievement.icon || '🏆'}</div>
+        <div class="achievement-unlocked-text">
+          <div class="achievement-unlocked-title">${achievement.type === 'quadrant' ? 'Zona Completata!' : 'Nuovo Badge!'}</div>
+          <div class="achievement-unlocked-name">${achievement.name}</div>
+          ${achievement.points ? `<div class="achievement-unlocked-points">+${achievement.points} punti</div>` : ''}
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    setTimeout(() => notification.classList.add('show'), 100);
+
+    // Remove after 4 seconds
+    setTimeout(() => {
+      notification.classList.remove('show');
+      setTimeout(() => notification.remove(), 500);
+    }, 4000);
   }
 
   // ========== GENERAL UI UPDATES ==========
