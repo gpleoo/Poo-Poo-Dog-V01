@@ -99,6 +99,24 @@ body {
     transform: scale(1.1);
 }
 
+/* Animazione lampeggiante per promemoria urgenti */
+.btn-reminders.urgent {
+    animation: pulse-urgent 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% {
+        background: rgba(255, 77, 77, 0.5);
+        border-color: #ff4d4d;
+        box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7);
+    }
+    50% {
+        background: rgba(255, 77, 77, 0.9);
+        border-color: #ff0000;
+        box-shadow: 0 0 0 10px rgba(255, 77, 77, 0);
+    }
+}
+
 .reminder-icon {
     font-size: 1.5em;
 }
@@ -920,6 +938,18 @@ button:active {
     max-width: 600px;
     max-height: 85vh;
     overflow-y: auto;
+}
+
+/* Urgent modal styling */
+.modal-reminders.urgent-modal {
+    border: 3px solid #ff4d4d;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
 .reminders-list {

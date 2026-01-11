@@ -444,4 +444,53 @@ export class DataService {
   getFoodHistory() {
     return [...this.foodHistory];
   }
+
+  /**
+   * Get urgent reminders (overdue or expiring soon)
+   */
+  getUrgentReminders() {
+    const profile = this.dogProfile;
+    const urgentReminders = [];
+    const now = new Date();
+
+    const reminders = [
+      { type: 'vaccination', date: profile.nextVaccination, title: '💉 Vaccinazione' },
+      { type: 'antiparasitic', date: profile.nextAntiparasitic, title: '🐛 Antiparassitario' },
+      { type: 'fleaTick', date: profile.nextFleaTick, title: '🦟 Antipulci/Zecche' }
+    ];
+
+    reminders.forEach(reminder => {
+      if (!reminder.date) return;
+
+      const dueDate = new Date(reminder.date);
+      const daysLeft = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+      // Only include overdue or expiring within 7 days
+      if (daysLeft <= 7) {
+        urgentReminders.push({
+          ...reminder,
+          dueDate: dueDate,
+          daysLeft: daysLeft,
+          isOverdue: daysLeft < 0
+        });
+      }
+    });
+
+    // Sort by urgency (overdue first, then by days left)
+    urgentReminders.sort((a, b) => {
+      if (a.isOverdue && !b.isOverdue) return -1;
+      if (!a.isOverdue && b.isOverdue) return 1;
+      return a.daysLeft - b.daysLeft;
+    });
+
+    return urgentReminders;
+  }
+
+  /**
+   * Check if there are overdue reminders
+   */
+  hasOverdueReminders() {
+    const urgentReminders = this.getUrgentReminders();
+    return urgentReminders.some(r => r.isOverdue);
+  }
 }

@@ -55,6 +55,22 @@
             </div>
         </div>
 
+        <!-- Urgent Reminders Alert Modal -->
+        <div id="urgentRemindersModal" class="modal" role="dialog" aria-labelledby="urgentRemindersTitle" aria-hidden="true">
+            <div class="modal-content modal-reminders urgent-modal">
+                <h2 id="urgentRemindersTitle" style="color: #ff4d4d;">⚠️ Promemoria Urgenti!</h2>
+
+                <div id="urgentRemindersList" class="reminders-list urgent-reminders-list">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="form-buttons">
+                    <button id="goToProfileFromUrgent" class="btn-save">⚙️ Vai al Profilo</button>
+                    <button id="closeUrgentReminders" class="btn-secondary">✖️ Ho Capito</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Settings/Privacy Modal -->
         <div id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsTitle" aria-hidden="true">
             <div class="modal-content modal-settings">
