@@ -1,0 +1,35 @@
+{
+  "name": "poo-poo-dog-tracker",
+  "version": "2.0.0",
+  "description": "Professional dog poop tracking app with GPS and health monitoring",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js"
+  },
+  "keywords": [
+    "dog",
+    "health",
+    "tracking",
+    "gps",
+    "pet"
+  ],
+  "authors": [
+    "Giampietro Leonoro",
+    "Monica Amato"
+  ],
+  "license": "PROPRIETARY",
+  "devDependencies": {
+    "terser": "^5.44.1",
+    "vite": "^5.0.11"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3"
+  }
+}
