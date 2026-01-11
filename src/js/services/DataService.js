@@ -406,16 +406,23 @@ export class DataService {
    * Get statistics
    */
   getStatistics() {
-    const total = this.poops.length;
-    const healthy = this.poops.filter(p => p.type === 'healthy').length;
-    const problems = this.poops.filter(p => ['soft', 'diarrhea', 'hard', 'blood', 'mucus'].includes(p.type)).length;
+    return this.calculateStatistics(this.poops);
+  }
 
-    const typeDistribution = this.poops.reduce((acc, poop) => {
+  /**
+   * Calculate statistics from specific poops array
+   */
+  calculateStatistics(poops) {
+    const total = poops.length;
+    const healthy = poops.filter(p => p.type === 'healthy').length;
+    const problems = poops.filter(p => ['soft', 'diarrhea', 'hard', 'blood', 'mucus'].includes(p.type)).length;
+
+    const typeDistribution = poops.reduce((acc, poop) => {
       acc[poop.type] = (acc[poop.type] || 0) + 1;
       return acc;
     }, {});
 
-    const foodDistribution = this.poops.reduce((acc, poop) => {
+    const foodDistribution = poops.reduce((acc, poop) => {
       if (poop.food) {
         acc[poop.food] = (acc[poop.food] || 0) + 1;
       }
