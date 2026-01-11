@@ -183,11 +183,16 @@ class PoopTracker {
    * Add poop with GPS
    */
   addPoop() {
-    const userPosition = this.mapService.getUserPosition();
+    let userPosition = this.mapService.getUserPosition();
 
+    // If no GPS position, use map center as fallback
     if (!userPosition) {
-      this.notificationService.showWarning('⚠️ Aspetta che la posizione venga rilevata!');
-      return;
+      const mapCenter = this.mapService.map.getCenter();
+      userPosition = {
+        lat: mapCenter.lat,
+        lng: mapCenter.lng
+      };
+      this.notificationService.showInfo('📍 GPS non disponibile - usando centro mappa');
     }
 
     // Play sound
@@ -375,8 +380,8 @@ class PoopTracker {
       // Update map markers
       this.mapService.updatePoopMarkers(filteredPoops);
 
-      // Update statistics
-      const stats = this.dataService.getStatistics();
+      // Update statistics WITH FILTERED DATA
+      const stats = this.dataService.calculateStatistics(filteredPoops);
       this.uiManager.updateStats(stats);
 
       // Update recent list
