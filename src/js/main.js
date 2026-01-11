@@ -14,6 +14,7 @@ import { NotificationService } from './services/NotificationService.js';
 import { ChartService } from './services/ChartService.js';
 import { ExportService } from './services/ExportService.js';
 import { UIManager } from './services/UIManager.js';
+import { AchievementsService } from './services/AchievementsService.js';
 
 import { COPYRIGHT } from './utils/constants.js';
 import { debounce } from './utils/helpers.js';
@@ -30,6 +31,7 @@ class PoopTracker {
     this.chartService = new ChartService();
     this.exportService = new ExportService();
     this.uiManager = new UIManager();
+    this.achievementsService = new AchievementsService();
 
     // Pending poop data
     this.pendingPoopData = null;
@@ -92,6 +94,19 @@ class PoopTracker {
 
       // Update dog marker
       this.updateDogMarker();
+
+      // Apply dog marker visibility from settings
+      const dogMarkerVisible = mapSettings.dogMarkerVisible !== false;
+      this.mapService.toggleDogMarkerVisibility(dogMarkerVisible);
+      this.updateDogMarkerButton(dogMarkerVisible);
+
+      // Apply quadrants visibility from settings
+      const quadrantsVisible = this.dataService.isQuadrantsGridVisible();
+      if (quadrantsVisible) {
+        // Update quadrants overlay (will be shown if visible)
+        this.updateAchievementsUI();
+      }
+      this.updateQuadrantsButton(quadrantsVisible);
 
       console.log('✅ Application initialized successfully!');
     } catch (error) {
@@ -177,6 +192,18 @@ class PoopTracker {
     const centerMapBtn = document.getElementById('centerMapBtn');
     if (centerMapBtn) {
       centerMapBtn.addEventListener('click', () => this.mapService.centerOnUser());
+    }
+
+    // Toggle dog marker button
+    const toggleDogMarkerBtn = document.getElementById('toggleDogMarkerBtn');
+    if (toggleDogMarkerBtn) {
+      toggleDogMarkerBtn.addEventListener('click', () => this.toggleDogMarker());
+    }
+
+    // Toggle quadrants button
+    const toggleQuadrantsBtn = document.getElementById('toggleQuadrantsBtn');
+    if (toggleQuadrantsBtn) {
+      toggleQuadrantsBtn.addEventListener('click', () => this.toggleQuadrants());
     }
   }
 
@@ -266,6 +293,9 @@ class PoopTracker {
 
       // Update UI
       this.updateAllUI();
+
+      // Update achievements and check for new ones
+      this.updateAchievementsUI();
 
       // Show success message
       if (poop.isManual) {
@@ -517,6 +547,122 @@ class PoopTracker {
     }
   }
 
+  toggleDogMarker() {
+    try {
+      const currentVisibility = this.mapService.isDogMarkerVisible();
+      const newVisibility = !currentVisibility;
+
+      this.mapService.toggleDogMarkerVisibility(newVisibility);
+      this.updateDogMarkerButton(newVisibility);
+
+      // Save preference
+      const mapSettings = this.mapService.getMapSettings();
+      mapSettings.dogMarkerVisible = newVisibility;
+      this.dataService.saveMapSettings(mapSettings);
+
+      // Show feedback
+      if (newVisibility) {
+        this.notificationService.showInfo('🐕 Marker del cane visibile');
+      } else {
+        this.notificationService.showInfo('🐕 Marker del cane nascosto');
+      }
+    } catch (error) {
+      console.error('Error toggling dog marker:', error);
+      this.notificationService.showError('Errore durante il toggle del marker');
+    }
+  }
+
+  updateDogMarkerButton(isVisible) {
+    const btn = document.getElementById('toggleDogMarkerBtn');
+    if (btn) {
+      if (isVisible) {
+        btn.classList.add('active');
+        btn.title = 'Nascondi marker del cane';
+      } else {
+        btn.classList.remove('active');
+        btn.title = 'Mostra marker del cane';
+      }
+    }
+  }
+
+  toggleQuadrants() {
+    try {
+      const currentVisibility = this.mapService.areQuadrantsVisible();
+      const newVisibility = !currentVisibility;
+
+      this.mapService.toggleQuadrantsOverlay(newVisibility);
+      this.updateQuadrantsButton(newVisibility);
+
+      // Save preference
+      this.dataService.setQuadrantsGridVisible(newVisibility);
+
+      // Show feedback
+      if (newVisibility) {
+        this.notificationService.showInfo('🗺️ Quadranti visibili');
+      } else {
+        this.notificationService.showInfo('🗺️ Quadranti nascosti');
+      }
+    } catch (error) {
+      console.error('Error toggling quadrants:', error);
+      this.notificationService.showError('Errore durante il toggle dei quadranti');
+    }
+  }
+
+  updateQuadrantsButton(isVisible) {
+    const btn = document.getElementById('toggleQuadrantsBtn');
+    if (btn) {
+      if (isVisible) {
+        btn.classList.add('active');
+        btn.title = 'Nascondi quadranti';
+      } else {
+        btn.classList.remove('active');
+        btn.title = 'Mostra quadranti';
+      }
+    }
+  }
+
+  updateAchievementsUI() {
+    try {
+      // Get old completed count before update
+      const oldCompletedCount = this.dataService.getCompletedQuadrantsCount();
+
+      // Get current poops
+      const poops = this.dataService.getAllPoops();
+
+      // Calculate achievements
+      const achievementsData = this.achievementsService.getAchievements(poops);
+
+      // Update UI
+      this.uiManager.updateAchievements(achievementsData);
+
+      // Update quadrants overlay if visible
+      if (this.mapService.areQuadrantsVisible()) {
+        this.mapService.updateQuadrantsOverlay(
+          achievementsData.quadrants,
+          (count) => this.achievementsService.getQuadrantColor(count)
+        );
+      }
+
+      // Check for new achievements
+      const newAchievement = this.achievementsService.checkNewAchievement(
+        oldCompletedCount,
+        achievementsData.completedQuadrants
+      );
+
+      if (newAchievement) {
+        // Show notification
+        setTimeout(() => {
+          this.uiManager.showAchievementUnlocked(newAchievement);
+        }, 1000);
+      }
+
+      // Save completed count
+      this.dataService.updateCompletedQuadrants(achievementsData.completedQuadrants);
+    } catch (error) {
+      console.error('Error updating achievements:', error);
+    }
+  }
+
   // ========== UI UPDATES ==========
 
   updateAllUI() {
@@ -556,6 +702,9 @@ class PoopTracker {
     // Update GPS status
     const gpsStatus = this.mapService.getGPSStatus();
     this.uiManager.updateGPSStatus(gpsStatus);
+
+    // Update achievements
+    this.updateAchievementsUI();
 
     // Save map settings
     const mapSettings = this.mapService.getMapSettings();
