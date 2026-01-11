@@ -45,7 +45,8 @@ export class UIManager {
       'poopDetailsModal',
       'filtersModal',
       'settingsModal',
-      'remindersModal'
+      'remindersModal',
+      'urgentRemindersModal'
     ];
 
     modalIds.forEach(id => {
@@ -656,6 +657,21 @@ export class UIManager {
         this.openModal('dogProfileModal');
       });
     }
+
+    // Urgent reminders modal listeners
+    const closeUrgentBtn = document.getElementById('closeUrgentReminders');
+    const goToProfileBtn = document.getElementById('goToProfileFromUrgent');
+
+    if (closeUrgentBtn) {
+      closeUrgentBtn.addEventListener('click', () => this.closeModal('urgentRemindersModal'));
+    }
+
+    if (goToProfileBtn) {
+      goToProfileBtn.addEventListener('click', () => {
+        this.closeModal('urgentRemindersModal');
+        this.openModal('dogProfileModal');
+      });
+    }
   }
 
   /**
@@ -756,6 +772,58 @@ export class UIManager {
 
     // Sort by days left
     return reminders.sort((a, b) => a.daysLeft - b.daysLeft);
+  }
+
+  /**
+   * Show urgent reminders modal
+   */
+  showUrgentReminders(urgentReminders) {
+    const list = document.getElementById('urgentRemindersList');
+    if (!list) return;
+
+    if (urgentReminders.length === 0) {
+      return; // Don't show modal if no urgent reminders
+    }
+
+    // Populate the list
+    list.innerHTML = urgentReminders.map(reminder => {
+      const statusIcon = reminder.isOverdue ? '🔴' : '⚠️';
+      const statusClass = reminder.isOverdue ? 'reminder-overdue' : 'reminder-warning';
+
+      const daysText = reminder.isOverdue
+        ? `<strong>Scaduto da ${Math.abs(reminder.daysLeft)} giorni!</strong>`
+        : reminder.daysLeft === 0
+        ? '<strong>Scade OGGI!</strong>'
+        : `<strong>Scade tra ${reminder.daysLeft} giorni</strong>`;
+
+      return `
+        <div class="reminder-item ${statusClass}">
+          <div class="reminder-icon">${statusIcon}</div>
+          <div class="reminder-content">
+            <div class="reminder-title">${reminder.title}</div>
+            <div class="reminder-date">${formatDate(new Date(reminder.dueDate), { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            <div class="reminder-days">${daysText}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Open the modal
+    this.openModal('urgentRemindersModal');
+  }
+
+  /**
+   * Update reminder icon urgency status
+   */
+  updateReminderIconUrgency(hasUrgent) {
+    const btn = document.getElementById('remindersBtn');
+    if (btn) {
+      if (hasUrgent) {
+        btn.classList.add('urgent');
+      } else {
+        btn.classList.remove('urgent');
+      }
+    }
   }
 
   // ========== GENERAL UI UPDATES ==========

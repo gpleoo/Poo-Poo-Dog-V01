@@ -75,6 +75,9 @@ class PoopTracker {
       // Update UI
       this.updateAllUI();
 
+      // Check urgent reminders (after UI is ready)
+      this.checkUrgentReminders();
+
       // Show welcome message if first time
       if (this.dataService.isFirstTime && !this.dataService.dogProfile.name) {
         setTimeout(() => {
@@ -326,6 +329,15 @@ class PoopTracker {
       this.updateDogMarker();
       this.updateReminders();
 
+      // Check if there are urgent reminders after saving profile
+      const urgentReminders = this.dataService.getUrgentReminders();
+      if (urgentReminders.length > 0 && urgentReminders.some(r => r.isOverdue)) {
+        // Show urgent modal if there are overdue reminders
+        setTimeout(() => {
+          this.uiManager.showUrgentReminders(urgentReminders);
+        }, 500);
+      }
+
       this.notificationService.showSuccess('✅ Profilo salvato con successo!');
       this.uiManager.closeModal('dogProfileModal');
     } catch (error) {
@@ -553,6 +565,22 @@ class PoopTracker {
   updateReminders() {
     const dogProfile = this.dataService.getDogProfile();
     this.uiManager.updateReminders(dogProfile);
+
+    // Update icon urgency status
+    const hasUrgent = this.dataService.hasOverdueReminders();
+    this.uiManager.updateReminderIconUrgency(hasUrgent);
+  }
+
+  checkUrgentReminders() {
+    // Get urgent reminders from data service
+    const urgentReminders = this.dataService.getUrgentReminders();
+
+    if (urgentReminders.length > 0) {
+      // Show modal after a short delay to let the UI finish loading
+      setTimeout(() => {
+        this.uiManager.showUrgentReminders(urgentReminders);
+      }, 1500);
+    }
   }
 
   // ========== CLEANUP ==========
