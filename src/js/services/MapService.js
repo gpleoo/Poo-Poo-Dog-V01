@@ -272,6 +272,10 @@ export class MapService {
   updateUserMarker(dogPhoto = null, dogName = 'il tuo cane') {
     if (!this.userPosition) return;
 
+    // Check if marker existed and was visible before updating
+    const hadMarker = !!this.userMarker;
+    const wasVisible = hadMarker ? this.isDogMarkerVisible() : true; // Default to visible on first creation
+
     if (this.userMarker) {
       this.map.removeLayer(this.userMarker);
     }
@@ -293,7 +297,12 @@ export class MapService {
         icon: userIcon,
         zIndexOffset: 1000
       }
-    ).addTo(this.map);
+    );
+
+    // Only add to map if it was visible before, or if this is the first time
+    if (wasVisible) {
+      this.userMarker.addTo(this.map);
+    }
 
     if (this.onUserMarkerClick) {
       this.userMarker.on('click', this.onUserMarkerClick);
