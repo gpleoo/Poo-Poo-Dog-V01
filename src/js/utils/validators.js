@@ -143,14 +143,14 @@ export function isValidBackup(data) {
   try {
     if (!data || typeof data !== 'object') return false;
 
-    // Current format: has version, poops array, dogProfile object
-    if ('version' in data && Array.isArray(data.poops)) return true;
+    // Current format (v2+): poops array at root level
+    if (Array.isArray(data.poops)) return true;
 
-    // Legacy format v1: has poops array but no version
-    if (Array.isArray(data.poops) && data.poops.length >= 0) return true;
+    // Legacy v1 format: all data nested under "data" object
+    if (data.data && typeof data.data === 'object' && Array.isArray(data.data.poops)) return true;
 
     // Legacy format: poops stored under different key names
-    if (Array.isArray(data.records) || Array.isArray(data.data)) return true;
+    if (Array.isArray(data.records)) return true;
 
     // Legacy format: top-level array of poops
     if (Array.isArray(data)) return true;

@@ -422,15 +422,29 @@ export class DataService {
       data = { poops: data, dogProfile: {} };
     }
 
+    // Migrate legacy v1 format: all data nested under "data" object
+    // e.g. { version: "1.0", dogName: "Pomino", data: { poops: [...], dogPhoto: "...", ... } }
+    if (data.data && typeof data.data === 'object' && Array.isArray(data.data.poops)) {
+      const nested = data.data;
+      data.poops = nested.poops;
+      data.dogProfile = nested.dogProfile || {};
+      data.dogPhoto = nested.dogPhoto || null;
+      data.savedNotes = nested.savedNotes || [];
+      data.foodHistory = nested.foodHistory || [];
+      // Use dogName from root level if profile doesn't have it
+      if (data.dogName && (!data.dogProfile || !data.dogProfile.name)) {
+        data.dogProfile = data.dogProfile || {};
+        data.dogProfile.name = data.dogName;
+      }
+    }
+
     // Migrate legacy format: poops under different keys
     if (!data.poops && Array.isArray(data.records)) {
       data.poops = data.records;
-    } else if (!data.poops && Array.isArray(data.data)) {
-      data.poops = data.data;
     }
 
     // Normalize each poop record for compatibility with old field names
-    const normalizedPoops = (data.poops || []).map(poop => this._normalizePoop(poop));
+    const normalizedPoops = (data.poops || []).map(poop => this._normalizePoop(poop)).filter(Boolean);
 
     // Restore data with defaults for missing fields
     this.poops = normalizedPoops;
@@ -461,8 +475,8 @@ export class DataService {
     if (!poop || typeof poop !== 'object') return null;
 
     return {
-      // ID: use existing or generate new
-      id: poop.id || poop._id || generateId(),
+      // ID: use existing or generate new (ensure string)
+      id: String(poop.id || poop._id || generateId()),
       // Timestamp: try different field names
       timestamp: poop.timestamp || poop.date || poop.time || poop.createdAt || new Date().toISOString(),
       // Coordinates
